@@ -1,0 +1,42 @@
+# macOS
+.DS_Store
+
+# Xcode
+*.xcworkspace
+*.xcuserstate
+*.xcodeproj/project.xcworkspace
+*.xcodeproj/xcuserdata/
+*.xcodeproj/project.xcuserstate
+DerivedData/
+build/
+*.pbxuser
+!default.pbxuser
+
+# Swift Packages
+.swiftpm/
+Packages/
+Package.pins
+Package.resolved
+
+# Carthage
+Carthage/Checkouts
+Carthage/Build/
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+
+# CoreML Models (you should track only small ones)
+*.mlmodelc/
+*.mlpackage/
+
+
+# Large files
+AR3DScanner/Models/*.mlpackage/
+AR3DScanner/Models/*.bin 
