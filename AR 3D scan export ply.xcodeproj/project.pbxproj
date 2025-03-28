@@ -10,9 +10,34 @@
 		BE7000472D8B4F6800BA8CCB /* AR 3D scan export ply.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "AR 3D scan export ply.app"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		BE7000932D8B50F100BA8CCB /* Exceptions for "AR 3D scan export ply" folder in "AR 3D scan export ply" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+				Models/MiDaS.mlpackage,
+			);
+			target = BE7000462D8B4F6800BA8CCB /* AR 3D scan export ply */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
+/* Begin PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+		BE7000952D8B50F900BA8CCB /* Exceptions for "AR 3D scan export ply" folder in "Copy Bundle Resources" phase from "AR 3D scan export ply" target */ = {
+			isa = PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet;
+			buildPhase = BE7000452D8B4F6800BA8CCB /* Resources */;
+			membershipExceptions = (
+				Models/MiDaS.mlpackage,
+			);
+		};
+/* End PBXFileSystemSynchronizedGroupBuildPhaseMembershipExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		BE7000492D8B4F6800BA8CCB /* AR 3D scan export ply */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				BE7000932D8B50F100BA8CCB /* Exceptions for "AR 3D scan export ply" folder in "AR 3D scan export ply" target */,
+				BE7000952D8B50F900BA8CCB /* Exceptions for "AR 3D scan export ply" folder in "Copy Bundle Resources" phase from "AR 3D scan export ply" target */,
+			);
 			path = "AR 3D scan export ply";
 			sourceTree = "<group>";
 		};
@@ -132,7 +157,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K7Y3HF8PMF;
+				DEVELOPMENT_TEAM = 4QTAXLQ8FV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AR 3D scan export ply/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -160,7 +185,7 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = K7Y3HF8PMF;
+				DEVELOPMENT_TEAM = 4QTAXLQ8FV;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = "AR 3D scan export ply/Info.plist";
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;

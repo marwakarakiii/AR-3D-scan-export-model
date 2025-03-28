@@ -20,10 +20,14 @@ class MiDaSFeatureInput: MLFeatureProvider {
 /// The depth estimator that loads `MiDaS.mlmodelc` from the app bundle.
 class DepthEstimator {
 
-    /// 1) Load the `.mlmodelc` manually as an `MLModel` (no auto‐generated classes).
+    // ---------------------------------------
+    // Turn this OFF to suppress debug overlays:
+    // ---------------------------------------
+    var showDebugOverlay: Bool = true
+
+    /// 1) Load the `.mlmodelc` manually as an `MLModel`.
     private lazy var miDaSModel: MLModel = {
-        // Example: we look for "MiDaS.mlmodelc" in the app bundle
-        let modelName = "MiDaS"  // Adjust if your compiled model is named differently
+        let modelName = "MiDaS"
         let modelExtension = "mlmodelc"
 
         guard let modelURL = Bundle.main.url(forResource: modelName, withExtension: modelExtension) else {
@@ -71,7 +75,6 @@ class DepthEstimator {
         }
 
         // 6. Extract the depth multi-array from the output dictionary
-        //    You must match the actual output key from your model. If it's "var_1847", etc.
         guard let depthArray = output.featureValue(for: "var_1847")?.multiArrayValue else {
             print("❌ Depth output (var_1847) not found in the model output.")
             return nil
@@ -112,9 +115,9 @@ class DepthEstimator {
                     // Extract ARGB → RGB (normalize 0..1)
                     let r = Float((pixel >> 16) & 0xFF) / 255.0
                     let g = Float((pixel >> 8) & 0xFF) / 255.0
-                    let b = Float((pixel) & 0xFF) / 255.0
+                    let b = Float(pixel & 0xFF) / 255.0
 
-                    // Fill the MLMultiArray (channel-major) [batch=1, channels=3, height=256, width=256]
+                    // Fill the MLMultiArray [batch=1, channels=3, height=256, width=256], channel-first
                     floatPtr[offset] = r
                     floatPtr[256 * 256 + offset] = g
                     floatPtr[2 * 256 * 256 + offset] = b
@@ -130,9 +133,7 @@ class DepthEstimator {
 
     // MARK: - Private Helper: Convert MLMultiArray → ([Float], width, height)
     private func multiArrayToFloatArray(_ array: MLMultiArray) -> ([Float], Int, Int) {
-        // The shape is [1, 256, 256] => or sometimes [1, h, w]
-        // or [1, height, width]. Adjust if needed.
-        // Check your MiDaS model's actual output shape.
+        // The shape is [1, 256, 256] => [batch, height, width]
         let batch = array.shape[0].intValue  // typically 1
         let height = array.shape[1].intValue
         let width  = array.shape[2].intValue
@@ -143,17 +144,26 @@ class DepthEstimator {
         for hIndex in 0..<height {
             for wIndex in 0..<width {
                 let idx = hIndex * width + wIndex
+                // Casting MLMultiArray element to Float
                 floats.append(Float(truncating: array[idx]))
             }
         }
-        print("Depth output shape: [\(batch), \(height), \(width)] => \(floats.count) floats")
+
+        // ❌ Remove or comment out the shape log to avoid spam:
+        // print("Depth output shape: [\(batch), \(height), \(width)] => \(floats.count) floats")
+
         return (floats, width, height)
     }
 
     // MARK: - Private Helper: Debug Visualization of Depth
     private func debugDepthMap(depthValues: [Float], width: Int, height: Int) {
+        // If user turned off overlay, skip everything
+        guard showDebugOverlay else { return }
+
         guard let minVal = depthValues.min(),
-              let maxVal = depthValues.max() else { return }
+              let maxVal = depthValues.max() else {
+            return
+        }
 
         var pixels = [UInt8](repeating: 0, count: width * height)
         for i in 0..<depthValues.count {
@@ -164,11 +174,20 @@ class DepthEstimator {
         guard let depthImage = UIImage.fromGrayscaleArray(pixels, width: width, height: height) else { return }
 
         DispatchQueue.main.async {
+            // Remove existing overlay if present
+            UIApplication.shared.windows.first?.viewWithTag(999)?.removeFromSuperview()
+
             let debugView = UIImageView(image: depthImage)
             debugView.frame = UIScreen.main.bounds
             debugView.contentMode = .scaleAspectFit
+            debugView.tag = 999
             UIApplication.shared.windows.first?.addSubview(debugView)
             print("✅ Depth map debug overlay displayed.")
+
+            // Auto-remove after 2 seconds
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                debugView.removeFromSuperview()
+            }
         }
     }
 }

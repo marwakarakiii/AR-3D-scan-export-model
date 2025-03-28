@@ -8,6 +8,9 @@ class CaptureViewController: UIViewController, AVCapturePhotoCaptureDelegate {
     private var previewLayer: AVCaptureVideoPreviewLayer!
 
     private var capturedImages: [UIImage] = []
+    
+    // We'll store a reference to the button
+    private var captureButton: UIButton!
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -19,7 +22,9 @@ class CaptureViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         captureSession = AVCaptureSession()
         captureSession.sessionPreset = .photo
 
-        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera, for: .video, position: .back),
+        guard let device = AVCaptureDevice.default(.builtInWideAngleCamera,
+                                                   for: .video,
+                                                   position: .back),
               let input = try? AVCaptureDeviceInput(device: device) else {
             print("❌ Failed to access camera.")
             return
@@ -34,35 +39,33 @@ class CaptureViewController: UIViewController, AVCapturePhotoCaptureDelegate {
             captureSession.addOutput(photoOutput)
         }
 
-        // ✅ Initialize previewLayer properly
+        // previewLayer
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.videoGravity = .resizeAspectFill
         previewLayer.frame = view.bounds
+
         DispatchQueue.main.async {
             self.view.layer.insertSublayer(self.previewLayer, at: 0)
         }
 
-
         DispatchQueue.global(qos: .userInitiated).async {
-            self.captureSession.startRunning() // ✅ Prevents UI freeze
+            self.captureSession.startRunning()
         }
 
         print("✅ Camera setup complete.")
     }
 
-
     func setupUI() {
-        let captureButton = UIButton(type: .system)
+        // Keep a reference in the property
+        captureButton = UIButton(type: .system)
         captureButton.setTitle("Capture Image", for: .normal)
         captureButton.addTarget(self, action: #selector(capturePhoto), for: .touchUpInside)
-        
         captureButton.backgroundColor = UIColor.blue
         captureButton.setTitleColor(.white, for: .normal)
         captureButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: 18)
         captureButton.layer.cornerRadius = 10
         captureButton.clipsToBounds = true
 
-        // ✅ Use Auto Layout instead of fixed frame
         captureButton.translatesAutoresizingMaskIntoConstraints = false
         view.addSubview(captureButton)
 
@@ -78,31 +81,34 @@ class CaptureViewController: UIViewController, AVCapturePhotoCaptureDelegate {
 
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
-        
-        // ✅ Ensure previewLayer is not nil before using it
-        if let previewLayer = previewLayer {
-            previewLayer.frame = view.bounds
-        }
+        previewLayer?.frame = view.bounds
     }
 
     @objc func capturePhoto() {
-        print("📸 Capture button tapped!")
+        // 1) Prevent spamming by disabling the button
+        captureButton.isEnabled = false
 
+        print("📸 Capture button tapped!")
         guard let photoOutput = photoOutput else {
             print("❌ photoOutput is nil")
+            captureButton.isEnabled = true // Re-enable on failure
             return
         }
 
+        // 2) Configure your photo settings
         let settings = AVCapturePhotoSettings()
         settings.flashMode = .auto
+
         photoOutput.capturePhoto(with: settings, delegate: self)
     }
-
 
     // AVCapturePhotoCaptureDelegate
     func photoOutput(_ output: AVCapturePhotoOutput,
                      didFinishProcessingPhoto photo: AVCapturePhoto,
                      error: Error?) {
+        // 3) Re-enable the button so user can tap again
+        defer { captureButton.isEnabled = true }
+
         if let error = error {
             print("❌ Error capturing photo: \(error.localizedDescription)")
             return
@@ -117,20 +123,20 @@ class CaptureViewController: UIViewController, AVCapturePhotoCaptureDelegate {
         capturedImages.append(uiImage)
         print("✅ Photo captured! Total images stored: \(capturedImages.count)")
 
-        // Check if we have 10 images to proceed
+        // If you only want 10 images total:
         if capturedImages.count >= 10 {
             goToDepthEstimation()
         }
     }
 
-
     func goToDepthEstimation() {
         print("🚀 Navigating to Depth Estimation Screen!")
+        // If you REALLY only want 10 images, consider disabling the button here.
+        // captureButton.isEnabled = false
 
         DispatchQueue.main.async {
             let depthVC = DepthEstimationViewController(images: self.capturedImages)
             self.navigationController?.pushViewController(depthVC, animated: true)
         }
     }
-
 }
